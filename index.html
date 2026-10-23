@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Realm Defense 2D Plus</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="in-lobby">
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">GAME MINI 2D</p>
+        <h1>🌿 Realm Defense 2D <span id="verTag" class="ver-tag"></span></h1>
+        <p class="subtitle">Lindungi markas dari gelombang slime!</p>
+      </div>
+      <div class="stats">
+        <div class="stat"><span>❤️ Nyawa</span><strong id="health">10</strong></div>
+        <div class="stat"><span>🪙 Gold</span><strong id="gold">160</strong></div>
+        <div class="stat"><span>🌊 Wave</span><strong id="wave">0 / 10</strong></div>
+        <div class="stat"><span>🏆 Terbaik</span><strong id="best">-</strong></div>
+      </div>
+    </header>
+
+    <section id="lobby" class="lobby">
+      <div class="lobby-top">
+        <nav class="tabs" role="tablist">
+          <button class="tab active" data-tab="maps" role="tab">🗺️ Pilih Map</button>
+          <button class="tab" data-tab="squad" role="tab">🎒 Pasukan</button>
+          <button class="tab" data-tab="shop" role="tab">🛒 Toko</button>
+          <button class="tab event-tab" id="gachaTab" data-tab="gacha" role="tab" hidden>🎃 Gacha Halloween</button>
+          <button class="tab" data-tab="patch" role="tab">📜 Patch Note <span id="patchBadge" class="badge">BARU</span></button>
+        </nav>
+        <div class="badges">
+          <div class="coin-badge" id="coinBadge" title="Halloween Coin: didapat dari map event, dipakai untuk gacha" hidden>🎃 <strong id="coins">0</strong></div>
+          <div class="gem-badge" title="Gems didapat dari menyelesaikan wave">💎 <strong id="gems">0</strong></div>
+        </div>
+      </div>
+
+      <div data-panel="maps" class="tab-panel">
+        <p class="hint">Pilih medan pertempuran. Map yang lebih sulit memberi hadiah 💎 lebih banyak.</p>
+        <div id="mapGrid" class="map-grid"></div>
+      </div>
+      <div data-panel="squad" class="tab-panel" hidden>
+        <p class="hint">Pilih maksimal 5 unit untuk dibawa ke pertempuran. Unit lain dibeli di Toko.</p>
+        <div id="slotRow" class="slot-row"></div>
+        <div id="squadGrid" class="unit-grid"></div>
+      </div>
+      <div data-panel="shop" class="tab-panel" hidden>
+        <p class="hint">Beli unit permanen dengan 💎. Menang wave = dapat 💎 (3 per wave, +30 bonus jika menang).</p>
+        <div id="shopGrid" class="unit-grid"></div>
+      </div>
+
+      <div data-panel="gacha" class="tab-panel" hidden>
+        <div class="gacha-banner">
+          <div>
+            <h3>🎃 Gacha Halloween</h3>
+            <p class="hint">Dapatkan Halloween Coin dengan bermain di map event <b>Lembah Hantu</b> (2 🎃 per wave, +20 jika menang). Unit duplikat dikembalikan jadi coin.</p>
+            <small id="eventTimer" class="event-timer"></small>
+          </div>
+          <div class="gacha-actions">
+            <button id="pull1" class="primary">Tarik ×1 • 10 🎃</button>
+            <button id="pull10" class="primary pull10">Tarik ×10 • 90 🎃</button>
+          </div>
+        </div>
+        <div id="pityInfo" class="pity"></div>
+        <div id="gachaResults" class="gacha-results" aria-live="polite"></div>
+        <h4 class="gt-title">Peluang dasar & isi banner <small style="color:var(--muted);font-weight:400">(belum termasuk bonus pity)</small></h4>
+        <div id="gachaTable" class="gacha-table"></div>
+      </div>
+
+      <div data-panel="patch" class="tab-panel" hidden>
+        <p class="hint">Catatan setiap pembaruan game. Yang terbaru ada di paling atas.</p>
+        <div id="patchList" class="patch-list"></div>
+      </div>
+
+      <div class="lobby-foot">
+        <div id="lobbySummary" class="lobby-summary"></div>
+        <span id="lobbyToast" class="lobby-toast" aria-live="polite"></span>
+        <button id="playBtn" class="primary big">▶ Main</button>
+      </div>
+    </section>
+
+    <section id="gameView" class="game-panel" hidden>
+      <div class="canvas-wrap">
+        <canvas id="gameCanvas" width="900" height="520" aria-label="Peta permainan Tower Defense"></canvas>
+        <div id="overlay" class="overlay">
+          <div class="overlay-card">
+            <h2 id="overlayTitle">Siap bertahan?</h2>
+            <p id="overlayText">Pasang tower di rumput, lalu mulai wave pertama.</p>
+            <button id="startBtn" class="primary">Mulai permainan</button>
+            <button id="overlayLobbyBtn" class="ghost">🏠 Kembali ke Lobby</button>
+          </div>
+        </div>
+      </div>
+      <div class="controls">
+        <h2>🏰 Pilih Tower</h2>
+        <p class="hint">Pilih tower, lalu ketuk area rumput di peta. Pintasan: <kbd>1</kbd>–<kbd>5</kbd> pilih tower, <kbd>N</kbd> wave, <kbd>U</kbd> upgrade, <kbd>S</kbd> jual, <kbd>M</kbd> meteor, <kbd>P</kbd> jeda, <kbd>F</kbd> kecepatan.</p>
+        <div id="towerGrid" class="tower-grid"></div>
+
+        <div id="wavePreview" class="wave-preview" aria-live="polite"></div>
+        <div class="wave-bar" aria-hidden="true"><div id="waveFill"></div></div>
+
+        <div class="action-row">
+          <button id="waveBtn" class="primary" disabled>▶ Mulai Wave</button>
+          <button id="upgradeBtn" disabled>⬆ Upgrade</button>
+          <button id="sellBtn" disabled>💰 Jual</button>
+        </div>
+        <div id="selectionInfo" class="selection-info">Belum ada tower dipilih.</div>
+        <div class="action-row secondary-row">
+          <button id="meteorBtn" class="skill" disabled>☄️ Meteor (M)</button>
+        </div>
+        <div class="action-row secondary-row">
+          <button id="pauseBtn" disabled>⏸ Jeda</button>
+          <button id="speedBtn" disabled>⏩ Kecepatan x1</button>
+          <button id="restartBtn">↻ Ulangi</button>
+          <button id="lobbyBtn">🏠 Lobby</button>
+          <button id="soundBtn" class="icon-btn" aria-label="Suara menyala">🔊</button>
+        </div>
+        <p id="message" class="message">Tips: tower tidak bisa dipasang di jalan atau terlalu dekat dengan tower lain.</p>
+      </div>
+    </section>
+    <footer>Proyek belajar HTML, CSS, dan JavaScript • Semua berjalan di browser</footer>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
